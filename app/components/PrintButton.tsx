@@ -31,20 +31,46 @@ export default function PrintButton() {
                 backgroundColor: "#ffffff",
                 windowWidth: 794,
                 onclone: (clonedDoc: Document) => {
-                    // RegExp to catch modern CSS color functions that html2canvas can't handle
+                    // RegExp to catch ALL modern CSS color functions html2canvas can't parse
                     const colorFnRegex = /\b(?:oklch|oklab|lab|lch|hwb|color)\([^)]*\)/g;
 
-                    // Fix inline <style> tags
+                    // 1. Extract CSS from external stylesheets, sanitize, and re-inject as inline
+                    const extractedCSS: string[] = [];
+                    clonedDoc.querySelectorAll('link[rel="stylesheet"]').forEach((link) => {
+                        try {
+                            // Find the matching stylesheet from the original document
+                            const href = (link as HTMLLinkElement).href;
+                            for (let i = 0; i < document.styleSheets.length; i++) {
+                                const sheet = document.styleSheets[i];
+                                if (sheet.href && (sheet.href === href || href.includes(sheet.href.split('/').pop() || '___'))) {
+                                    try {
+                                        const rules = sheet.cssRules || sheet.rules;
+                                        for (let j = 0; j < rules.length; j++) {
+                                            extractedCSS.push(rules[j].cssText);
+                                        }
+                                    } catch { /* cross-origin, skip */ }
+                                    break;
+                                }
+                            }
+                        } catch { /* skip */ }
+                        link.remove();
+                    });
+
+                    // 2. Fix inline <style> tags
                     clonedDoc.querySelectorAll("style").forEach((style) => {
                         if (style.textContent) {
                             style.textContent = style.textContent.replace(colorFnRegex, "#666666");
                         }
                     });
 
-                    // DO NOT remove external stylesheets — keep them to preserve layout
-                    // Instead, just fix the modern color functions in them via computed styles
+                    // 3. Inject extracted + sanitized CSS
+                    if (extractedCSS.length > 0) {
+                        const extractedStyle = clonedDoc.createElement("style");
+                        extractedStyle.textContent = extractedCSS.join("\n").replace(colorFnRegex, "#666666");
+                        clonedDoc.head.appendChild(extractedStyle);
+                    }
 
-                    // Force print-document to be exactly A4 width
+                    // 4. Force print-document to be exactly A4 width
                     const clonedEl = clonedDoc.querySelector(".print-document") as HTMLElement;
                     if (clonedEl) {
                         clonedEl.style.width = "794px";
@@ -54,7 +80,7 @@ export default function PrintButton() {
                         clonedEl.style.borderRadius = "0";
                     }
 
-                    // Inject safe overrides (don't strip everything)
+                    // 5. Inject additional safe overrides
                     const safeStyle = clonedDoc.createElement("style");
                     safeStyle.textContent = `
                         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
@@ -73,16 +99,13 @@ export default function PrintButton() {
 
                         .no-print { display: none !important; }
 
-                        /* Fix RTL text alignment */
                         [dir="rtl"] { direction: rtl; text-align: right; }
                         [dir="ltr"] { direction: ltr; text-align: left; }
 
-                        /* Ensure grid renders properly */
                         .grid { display: grid !important; }
                         .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
                         .flex { display: flex !important; }
 
-                        /* Force backgrounds to render */
                         [style*="background"] { -webkit-print-color-adjust: exact; }
                     `;
                     clonedDoc.head.appendChild(safeStyle);
