@@ -18,56 +18,115 @@ export default function PrintButton() {
             const html2canvas = html2canvasModule.default;
             const { jsPDF } = await import("jspdf");
 
+            // Temporarily force fixed width for A4 rendering
+            const originalWidth = element.style.width;
+            const originalMaxWidth = element.style.maxWidth;
+            element.style.width = "794px";    // A4 at 96dpi
+            element.style.maxWidth = "794px";
+
             const canvas = await html2canvas(element, {
-                scale: 2,
+                scale: 2.5,
                 useCORS: true,
                 logging: false,
                 backgroundColor: "#ffffff",
+                windowWidth: 794,
                 onclone: (clonedDoc: Document) => {
-                    // Build a single regex that catches ALL modern CSS color functions:
-                    // oklch(), oklab(), lab(), lch(), hwb(), color()
+                    // RegExp to catch modern CSS color functions that html2canvas can't handle
                     const colorFnRegex = /\b(?:oklch|oklab|lab|lch|hwb|color)\([^)]*\)/g;
 
-                    // 1. Strip from all <style> tags
+                    // Fix inline <style> tags
                     clonedDoc.querySelectorAll("style").forEach((style) => {
                         if (style.textContent) {
                             style.textContent = style.textContent.replace(colorFnRegex, "#666666");
                         }
                     });
 
-                    // 2. Remove all external stylesheets that might contain modern colors
-                    //    and inline critical styles instead
-                    clonedDoc.querySelectorAll('link[rel="stylesheet"]').forEach((link) => {
-                        link.remove();
-                    });
+                    // DO NOT remove external stylesheets — keep them to preserve layout
+                    // Instead, just fix the modern color functions in them via computed styles
 
-                    // 3. Inject safe CSS that covers what we need for the document
+                    // Force print-document to be exactly A4 width
+                    const clonedEl = clonedDoc.querySelector(".print-document") as HTMLElement;
+                    if (clonedEl) {
+                        clonedEl.style.width = "794px";
+                        clonedEl.style.maxWidth = "794px";
+                        clonedEl.style.margin = "0";
+                        clonedEl.style.boxShadow = "none";
+                        clonedEl.style.borderRadius = "0";
+                    }
+
+                    // Inject safe overrides (don't strip everything)
                     const safeStyle = clonedDoc.createElement("style");
                     safeStyle.textContent = `
-            * { box-sizing: border-box; }
-            body { margin: 0; font-family: 'Cairo', sans-serif; }
-            .print-document * {
-              border-color: #e5e7eb !important;
-            }
-          `;
+                        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
+
+                        * { box-sizing: border-box; }
+                        body { margin: 0; padding: 0; }
+
+                        .print-document {
+                            font-family: 'Cairo', 'Noto Sans Arabic', sans-serif !important;
+                            -webkit-print-color-adjust: exact;
+                            print-color-adjust: exact;
+                        }
+                        .print-document * {
+                            font-family: 'Cairo', 'Noto Sans Arabic', sans-serif !important;
+                        }
+
+                        .no-print { display: none !important; }
+
+                        /* Fix RTL text alignment */
+                        [dir="rtl"] { direction: rtl; text-align: right; }
+                        [dir="ltr"] { direction: ltr; text-align: left; }
+
+                        /* Ensure grid renders properly */
+                        .grid { display: grid !important; }
+                        .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+                        .flex { display: flex !important; }
+
+                        /* Force backgrounds to render */
+                        [style*="background"] { -webkit-print-color-adjust: exact; }
+                    `;
                     clonedDoc.head.appendChild(safeStyle);
                 },
             });
 
-            const imgData = canvas.toDataURL("image/jpeg", 0.98);
+            // Restore original styles
+            element.style.width = originalWidth;
+            element.style.maxWidth = originalMaxWidth;
 
-            // Fit PDF page exactly to content — no blank space
+            const imgData = canvas.toDataURL("image/jpeg", 0.95);
+
+            // Fixed A4 page: 210mm x 297mm
             const a4Width = 210;
-            const contentAspect = canvas.height / canvas.width;
-            const pdfHeight = a4Width * contentAspect;
+            const a4Height = 297;
 
+            // Calculate image dimensions to fit A4 width
+            const imgWidth = a4Width;
+            const imgHeight = (canvas.height / canvas.width) * a4Width;
+
+            // Create proper A4 PDF
             const pdf = new jsPDF({
                 orientation: "portrait",
                 unit: "mm",
-                format: [a4Width, pdfHeight],
+                format: "a4",
             });
 
-            pdf.addImage(imgData, "JPEG", 0, 0, a4Width, pdfHeight);
+            // If content fits in one page
+            if (imgHeight <= a4Height) {
+                pdf.addImage(imgData, "JPEG", 0, 0, imgWidth, imgHeight);
+            } else {
+                // Multi-page: split content across A4 pages
+                let remainingHeight = imgHeight;
+                let position = 0;
+
+                while (remainingHeight > 0) {
+                    if (position > 0) {
+                        pdf.addPage("a4", "portrait");
+                    }
+                    pdf.addImage(imgData, "JPEG", 0, -position, imgWidth, imgHeight);
+                    remainingHeight -= a4Height;
+                    position += a4Height;
+                }
+            }
 
             const docTitle = document.querySelector("h1")?.textContent || "document";
             pdf.save(`${docTitle}.pdf`);

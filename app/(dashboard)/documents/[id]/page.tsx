@@ -86,11 +86,22 @@ export default async function DocumentPage({
                         background: "linear-gradient(135deg, #044199 0%, #022a63 100%)",
                         padding: "20px 28px",
                         display: "flex",
+                        flexDirection: "row",
                         justifyContent: "space-between",
                         alignItems: "center",
+                        direction: "rtl",
                     }}
                 >
-                    <div className="flex items-center">
+                    <div>
+                        <div
+                            className="inline-block px-4 py-1.5 rounded-md text-white font-bold text-base"
+                            style={{ background: "rgba(255,255,255,0.18)" }}
+                        >
+                            {typeLabel}
+                        </div>
+                        <p className="text-blue-200 text-xs mt-1">{typeEnglish}</p>
+                    </div>
+                    <div>
                         {company.logoUrl ? (
                             <Image
                                 src={company.logoUrl}
@@ -101,77 +112,82 @@ export default async function DocumentPage({
                                 style={{ maxHeight: 48 }}
                             />
                         ) : (
-                            <div className="w-10 h-10 rounded bg-white/10" />
+                            <div style={{ width: 40, height: 40, borderRadius: 6, background: "rgba(255,255,255,0.1)" }} />
                         )}
-                    </div>
-                    <div className="text-left">
-                        <div
-                            className="inline-block px-4 py-1.5 rounded-md text-white font-bold text-sm"
-                            style={{ background: "rgba(255,255,255,0.18)" }}
-                        >
-                            {typeLabel}
-                        </div>
-                        <p className="text-blue-200 text-xs mt-0.5">{typeEnglish}</p>
                     </div>
                 </div>
 
                 {/* ── Meta Strip ── */}
                 <div
-                    className="flex justify-between items-center border-b"
-                    style={{ background: "#f0f5ff", padding: "10px 28px" }}
+                    style={{
+                        background: "#f0f5ff",
+                        padding: "12px 28px",
+                        display: "flex",
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        borderBottom: "1px solid #e5e7eb",
+                        direction: "rtl",
+                    }}
                 >
-                    <div className="flex gap-6">
+                    <div style={{ display: "flex", gap: "32px" }}>
                         <div>
-                            <span className="text-xs text-gray-400 block leading-tight">رقم المستند</span>
-                            <span className="font-bold text-gray-900 text-sm">{doc.documentNumber}</span>
+                            <span style={{ display: "block", fontSize: "11px", color: "#9ca3af", marginBottom: 2 }}>رقم المستند</span>
+                            <span style={{ fontWeight: 700, color: "#111827", fontSize: "14px" }} dir="ltr">{doc.documentNumber}</span>
                         </div>
                         <div>
-                            <span className="text-xs text-gray-400 block leading-tight">التاريخ</span>
-                            <span className="font-bold text-gray-900 text-sm">
+                            <span style={{ display: "block", fontSize: "11px", color: "#9ca3af", marginBottom: 2 }}>التاريخ</span>
+                            <span style={{ fontWeight: 700, color: "#111827", fontSize: "14px" }} dir="ltr">
                                 {format(doc.createdAt, "dd/MM/yyyy")}
                             </span>
                         </div>
                     </div>
-                    <div className="text-left">
-                        <span className="text-xs text-gray-400 block leading-tight">الإجمالي</span>
-                        <span className="font-extrabold text-lg text-[#044199]" dir="ltr">
+                    <div style={{ textAlign: "left" }}>
+                        <span style={{ display: "block", fontSize: "11px", color: "#9ca3af", marginBottom: 2 }}>الإجمالي</span>
+                        <span style={{ fontWeight: 800, fontSize: "18px", color: "#044199" }} dir="ltr">
                             {Number(doc.amount).toLocaleString()} {doc.currency}
                         </span>
                     </div>
                 </div>
 
-                {/* ── Client Info (من on right, العميل on left) ── */}
+                {/* ── Client Info ── */}
                 <div
-                    className="grid grid-cols-2 gap-4 border-b border-gray-100"
-                    style={{ padding: "14px 28px" }}
+                    style={{
+                        display: "grid",
+                        gridTemplateColumns: "1fr 1fr",
+                        gap: "16px",
+                        padding: "16px 28px",
+                        borderBottom: "1px solid #f3f4f6",
+                        direction: "rtl",
+                    }}
                 >
                     <div>
-                        <h3 className="text-xs font-bold uppercase tracking-wider text-[#044199] mb-1">
+                        <h3 style={{ fontSize: "11px", fontWeight: 800, color: "#044199", marginBottom: 4, letterSpacing: "0.05em" }}>
                             من
                         </h3>
-                        <p className="font-bold text-gray-900 text-sm">
+                        <p style={{ fontWeight: 700, color: "#111827", fontSize: "14px", margin: "2px 0" }}>
                             {company.companyName || "Ezdiharweb"}
                         </p>
-                        <p className="text-gray-500 text-xs">
+                        <p style={{ color: "#6b7280", fontSize: "12px", margin: "2px 0" }}>
                             {company.legalName || "Clicksalesmedia LLC"}
                         </p>
-                        <p className="text-gray-400 text-xs">
+                        <p style={{ color: "#9ca3af", fontSize: "12px", margin: "2px 0" }}>
                             {company.email || "info@ezdiharweb.com"}
                         </p>
                         {company.phone && (
-                            <p className="text-gray-400 text-xs"><span dir="ltr">{company.phone}</span></p>
+                            <p style={{ color: "#9ca3af", fontSize: "12px", margin: "2px 0" }} dir="ltr">{company.phone}</p>
                         )}
                     </div>
                     <div>
-                        <h3 className="text-xs font-bold uppercase tracking-wider text-[#044199] mb-1">
+                        <h3 style={{ fontSize: "11px", fontWeight: 800, color: "#044199", marginBottom: 4, letterSpacing: "0.05em" }}>
                             العميل
                         </h3>
-                        <p className="font-bold text-gray-900 text-sm">
+                        <p style={{ fontWeight: 700, color: "#111827", fontSize: "14px", margin: "2px 0" }}>
                             {doc.client.company || doc.client.name}
                         </p>
-                        <p className="text-gray-500 text-xs">{doc.client.name}</p>
+                        <p style={{ color: "#6b7280", fontSize: "12px", margin: "2px 0" }}>{doc.client.name}</p>
                         {doc.client.email && (
-                            <p className="text-gray-400 text-xs">{doc.client.email}</p>
+                            <p style={{ color: "#9ca3af", fontSize: "12px", margin: "2px 0" }}>{doc.client.email}</p>
                         )}
                     </div>
                 </div>
