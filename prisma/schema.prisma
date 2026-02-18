@@ -1,0 +1,180 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  SENIOR_ACCOUNT_MANAGER
+  ACCOUNT_MANAGER
+  CONTENT_CREATOR
+  FINANCE
+}
+
+enum ClientStatus {
+  ACTIVE
+  INACTIVE
+  LEAD
+}
+
+enum DocumentType {
+  PROFORMA
+  CONTRACT
+  INVOICE
+}
+
+enum DocumentStatus {
+  DRAFT
+  SENT
+  PAID
+  CANCELLED
+}
+
+enum PostType {
+  FEED
+  STORY
+  REEL
+  AD
+}
+
+enum PostStatus {
+  DRAFT
+  APPROVED
+  SCHEDULED
+  PUBLISHED
+}
+
+enum ScheduleType {
+  MWF
+  TU_TH_SA
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  password      String
+  role          Role      @default(ACCOUNT_MANAGER)
+  department    String?   
+  phone         String?
+  avatar        String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  clients       Client[]
+  documents     Document[]
+}
+
+model Client {
+  id              String       @id @default(cuid())
+  name            String
+  company         String?
+  email           String?
+  whatsapp        String?
+  status          ClientStatus @default(LEAD)
+  
+  accountManagerId String?
+  accountManager   User?       @relation(fields: [accountManagerId], references: [id])
+  
+  documents       Document[]
+  socialProfile   SocialMediaProfile?
+  
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+}
+
+model Document {
+  id              String         @id @default(cuid())
+  documentNumber  String         @unique // e.g., INV-2024-001
+  type            DocumentType
+  status          DocumentStatus @default(DRAFT)
+  
+  amount          Decimal        @db.Decimal(10, 2)
+  currency        String         @default("SAR")
+  notes           String?
+  
+  clientId        String
+  client          Client         @relation(fields: [clientId], references: [id])
+  
+  createdById     String
+  createdBy       User           @relation(fields: [createdById], references: [id])
+  
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+model CompanySettings {
+  id              String   @id @default("default")
+  companyName     String   @default("Ezdiharweb")
+  companyNameAr   String   @default("إزدهار ويب")
+  legalName       String   @default("Clicksalesmedia LLC")
+  email           String   @default("info@ezdiharweb.com")
+  phone           String   @default("")
+  website         String   @default("www.ezdiharweb.com")
+  address         String   @default("")
+  taxNumber       String   @default("")
+  logoUrl         String   @default("")
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model SocialMediaProfile {
+  id             String        @id @default(cuid())
+  clientId       String        @unique
+  client         Client        @relation(fields: [clientId], references: [id])
+  industry       String        @default("")
+  niche          String        @default("")
+  targetAudience String        @default("")
+  brandTone      String        @default("professional")
+  platforms      String[]      @default(["instagram"])
+  goals          String        @default("")
+  competitors    String        @default("")
+  brandColors    String        @default("")
+  sampleContent  String        @default("")
+  contentPlans   ContentPlan[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model ContentPlan {
+  id            String             @id @default(cuid())
+  profileId     String
+  profile       SocialMediaProfile @relation(fields: [profileId], references: [id])
+  month         Int
+  year          Int
+  scheduleType  ScheduleType       @default(MWF)
+  status        String             @default("draft")
+  posts         ContentPost[]
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+}
+
+model ContentPost {
+  id            String      @id @default(cuid())
+  planId        String
+  plan          ContentPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  date          DateTime
+  postType      PostType
+  platform      String      @default("instagram")
+  captionAr     String      @default("")
+  captionEn     String      @default("")
+  hashtags      String      @default("")
+  cta           String      @default("")
+  adHeadline    String      @default("")
+  adBody        String      @default("")
+  hookScript    String      @default("")
+  status        PostStatus  @default(DRAFT)
+  aiProvider    String      @default("openai")
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
