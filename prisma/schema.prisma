@@ -121,6 +121,8 @@ model CompanySettings {
   website         String   @default("www.ezdiharweb.com")
   address         String   @default("")
   taxNumber       String   @default("")
+  licenceNumber   String   @default("")
+  trn             String   @default("")
   logoUrl         String   @default("")
   
   createdAt       DateTime @default(now())

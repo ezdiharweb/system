@@ -28,57 +28,126 @@ body {
 
 @media print {
 
-  /* Hide everything except the document */
-  body>* {
+  /* A4 page: no margins — the document has its own padding */
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  /* Reset everything */
+  html,
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 210mm !important;
+    height: auto !important;
+    overflow: visible !important;
+    background: white !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* Hide EVERYTHING by default */
+  body * {
     visibility: hidden !important;
   }
 
-  /* Show only the document container */
+  /* Hide sidebar, header, navigation — target the dashboard layout */
+  aside,
+  nav,
+  header,
+  .no-print,
+  [class*="sidebar"],
+  [class*="Sidebar"] {
+    display: none !important;
+  }
+
+  /* Remove all layout containers' constraints */
+  body>div,
+  body>div>div,
+  body>div>div>div,
+  main,
+  [class*="flex"],
+  [class*="overflow"] {
+    display: block !important;
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+    max-height: none !important;
+    visibility: hidden !important;
+  }
+
+  /* Show ONLY the print document and its children */
   .print-document,
   .print-document * {
     visibility: visible !important;
   }
 
   .print-document {
-    position: absolute !important;
+    display: flex !important;
+    flex-direction: column !important;
+    position: fixed !important;
     top: 0 !important;
     left: 0 !important;
-    right: 0 !important;
-    width: 100% !important;
+    width: 210mm !important;
+    max-width: 210mm !important;
+    min-height: 297mm !important;
     margin: 0 !important;
     padding: 0 !important;
     box-shadow: none !important;
     border-radius: 0 !important;
+    border: none !important;
     background: white !important;
+    z-index: 999999 !important;
   }
 
-  /* A4 page setup */
-  @page {
-    size: A4;
-    margin: 12mm 15mm;
+  /* Push footer to bottom of A4 page */
+  .print-document .document-footer {
+    margin-top: auto !important;
   }
 
-  /* Hide non-print elements */
-  .no-print {
-    display: none !important;
-  }
-
-  /* Ensure colors print */
-  * {
+  /* Force colors to print */
+  .print-document * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
     color-adjust: exact !important;
   }
 
-  /* Prevent page breaks inside sections */
-  .section-block {
-    page-break-inside: avoid;
-    break-inside: avoid;
+  /* Ensure grids and flex work inside the document */
+  .print-document .grid {
+    display: grid !important;
   }
 
-  /* Force page break before signatures */
+  .print-document .grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .print-document .flex {
+    display: flex !important;
+  }
+
+  .print-document [style*="display: flex"] {
+    display: flex !important;
+  }
+
+  .print-document [style*="display: grid"] {
+    display: grid !important;
+  }
+
+  /* Prevent page breaks inside sections */
+  .print-document>div:not(.document-footer) {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Force page break before signatures on contracts */
   .signature-section {
-    page-break-before: auto;
     break-before: auto;
+    page-break-before: auto;
   }
 }

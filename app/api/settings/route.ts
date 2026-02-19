@@ -41,6 +41,8 @@ export async function PUT(request: Request) {
                 website: body.website || "",
                 address: body.address || "",
                 taxNumber: body.taxNumber || "",
+                licenceNumber: body.licenceNumber || "",
+                trn: body.trn || "",
                 logoUrl: body.logoUrl ?? "",
             },
             create: {
@@ -53,6 +55,8 @@ export async function PUT(request: Request) {
                 website: body.website || "",
                 address: body.address || "",
                 taxNumber: body.taxNumber || "",
+                licenceNumber: body.licenceNumber || "",
+                trn: body.trn || "",
                 logoUrl: body.logoUrl ?? "",
             },
         });

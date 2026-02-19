@@ -364,15 +364,84 @@ export default async function DocumentPage({
                 )}
 
                 {/* ── Footer ── */}
-                <div
-                    className="flex justify-between items-center border-t border-gray-100"
-                    style={{ background: "#fafafa", padding: "4px 28px" }}
-                >
-                    <div className="text-[10px] text-gray-400">
-                        {company.website || "www.ezdiharweb.com"} | {company.email || "info@ezdiharweb.com"}
+                <div className="document-footer" style={{ borderTop: "2px solid #044199" }}>
+                    {/* Tax note */}
+                    <div
+                        style={{
+                            padding: "8px 28px",
+                            background: "#f8fafc",
+                            textAlign: "center",
+                            direction: "rtl",
+                        }}
+                    >
+                        <p style={{ fontSize: "10px", color: "#9ca3af", margin: 0 }}>
+                            * غير شامل ضريبة القيمة المضافة إلا إذا ذُكر خلاف ذلك
+                        </p>
                     </div>
-                    <div className="text-[10px] text-gray-400">
-                        {company.phone && <span dir="ltr">{company.phone}</span>}
+
+                    {/* Main footer */}
+                    <div
+                        style={{
+                            background: "linear-gradient(135deg, #044199 0%, #022a63 100%)",
+                            padding: "16px 28px",
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "flex-start",
+                            direction: "rtl",
+                            gap: "16px",
+                        }}
+                    >
+                        {/* Company info */}
+                        <div style={{ flex: 1 }}>
+                            <p style={{ color: "white", fontSize: "12px", fontWeight: 700, margin: "0 0 4px 0" }}>
+                                {company.companyNameAr || company.companyName || "إزدهار ويب"}
+                            </p>
+                            <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "10px", margin: "0 0 2px 0" }}>
+                                {company.legalName || "Clicksalesmedia LLC"}
+                            </p>
+                            {company.address && (
+                                <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "10px", margin: "2px 0 0 0" }}>
+                                    {company.address}
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Contact */}
+                        <div style={{ flex: 1, textAlign: "center" }}>
+                            <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "10px", margin: "0 0 3px 0" }}>
+                                {company.email || "info@ezdiharweb.com"}
+                            </p>
+                            <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "10px", margin: "0 0 3px 0" }}>
+                                {company.website || "www.ezdiharweb.com"}
+                            </p>
+                            {company.phone && (
+                                <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "10px", margin: 0 }} dir="ltr">
+                                    {company.phone}
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Legal / Tax info */}
+                        <div style={{ flex: 1, textAlign: "left" }}>
+                            {company.taxNumber && (
+                                <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "10px", margin: "0 0 2px 0" }}>
+                                    <span style={{ color: "rgba(255,255,255,0.4)" }}>Tax No: </span>
+                                    <span dir="ltr">{company.taxNumber}</span>
+                                </p>
+                            )}
+                            {(company as unknown as Record<string, string>).licenceNumber && (
+                                <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "10px", margin: "0 0 2px 0" }}>
+                                    <span style={{ color: "rgba(255,255,255,0.4)" }}>Licence: </span>
+                                    <span dir="ltr">{(company as unknown as Record<string, string>).licenceNumber}</span>
+                                </p>
+                            )}
+                            {(company as unknown as Record<string, string>).trn && (
+                                <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "10px", margin: "0 0 2px 0" }}>
+                                    <span style={{ color: "rgba(255,255,255,0.4)" }}>TRN: </span>
+                                    <span dir="ltr">{(company as unknown as Record<string, string>).trn}</span>
+                                </p>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

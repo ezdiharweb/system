@@ -12,6 +12,8 @@ interface Settings {
     website: string;
     address: string;
     taxNumber: string;
+    licenceNumber: string;
+    trn: string;
     logoUrl: string;
 }
 
@@ -25,6 +27,8 @@ export default function SettingsPage() {
         website: "",
         address: "",
         taxNumber: "",
+        licenceNumber: "",
+        trn: "",
         logoUrl: "",
     });
     const [loading, setLoading] = useState(true);
@@ -255,6 +259,34 @@ export default function SettingsPage() {
                                 }
                                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                                 placeholder="Tax registration number"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Licence Number <span className="text-gray-400 font-normal">(optional)</span>
+                            </label>
+                            <input
+                                type="text"
+                                value={settings.licenceNumber}
+                                onChange={(e) =>
+                                    setSettings({ ...settings, licenceNumber: e.target.value })
+                                }
+                                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                                placeholder="Trade licence number"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                TRN <span className="text-gray-400 font-normal">(optional)</span>
+                            </label>
+                            <input
+                                type="text"
+                                value={settings.trn}
+                                onChange={(e) =>
+                                    setSettings({ ...settings, trn: e.target.value })
+                                }
+                                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                                placeholder="Tax Registration Number (TRN)"
                             />
                         </div>
                         <div className="col-span-2">
