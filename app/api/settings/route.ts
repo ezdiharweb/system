@@ -44,6 +44,9 @@ export async function PUT(request: Request) {
                 licenceNumber: body.licenceNumber || "",
                 trn: body.trn || "",
                 logoUrl: body.logoUrl ?? "",
+                stampUrl: body.stampUrl ?? "",
+                signatureUrl: body.signatureUrl ?? "",
+                representativeName: body.representativeName || "",
             },
             create: {
                 id: "default",
@@ -58,6 +61,9 @@ export async function PUT(request: Request) {
                 licenceNumber: body.licenceNumber || "",
                 trn: body.trn || "",
                 logoUrl: body.logoUrl ?? "",
+                stampUrl: body.stampUrl ?? "",
+                signatureUrl: body.signatureUrl ?? "",
+                representativeName: body.representativeName || "",
             },
         });
 

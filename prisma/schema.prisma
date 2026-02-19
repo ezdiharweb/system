@@ -100,6 +100,7 @@ model Document {
   amount          Decimal        @db.Decimal(10, 2)
   currency        String         @default("SAR")
   notes           String?
+  contractTerms   String?        @db.Text
   
   clientId        String
   client          Client         @relation(fields: [clientId], references: [id])
@@ -112,21 +113,24 @@ model Document {
 }
 
 model CompanySettings {
-  id              String   @id @default("default")
-  companyName     String   @default("Ezdiharweb")
-  companyNameAr   String   @default("إزدهار ويب")
-  legalName       String   @default("Clicksalesmedia LLC")
-  email           String   @default("info@ezdiharweb.com")
-  phone           String   @default("")
-  website         String   @default("www.ezdiharweb.com")
-  address         String   @default("")
-  taxNumber       String   @default("")
-  licenceNumber   String   @default("")
-  trn             String   @default("")
-  logoUrl         String   @default("")
+  id                String   @id @default("default")
+  companyName       String   @default("Ezdiharweb")
+  companyNameAr     String   @default("إزدهار ويب")
+  legalName         String   @default("Clicksalesmedia LLC")
+  email             String   @default("info@ezdiharweb.com")
+  phone             String   @default("")
+  website           String   @default("www.ezdiharweb.com")
+  address           String   @default("")
+  taxNumber         String   @default("")
+  licenceNumber     String   @default("")
+  trn               String   @default("")
+  logoUrl           String   @default("")
+  stampUrl          String   @default("")
+  signatureUrl      String   @default("")
+  representativeName String  @default("")
   
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }
 
 model SocialMediaProfile {

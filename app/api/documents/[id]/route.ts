@@ -44,13 +44,18 @@ export async function PUT(
 
     try {
         const json = await request.json();
+
+        // Build update object — only include provided fields
+        const updateData: Record<string, unknown> = {};
+        if (json.status !== undefined) updateData.status = json.status;
+        if (json.amount !== undefined) updateData.amount = json.amount;
+        if (json.currency !== undefined) updateData.currency = json.currency;
+        if (json.notes !== undefined) updateData.notes = json.notes;
+        if (json.contractTerms !== undefined) updateData.contractTerms = json.contractTerms;
+
         const document = await prisma.document.update({
             where: { id },
-            data: {
-                status: json.status,
-                amount: json.amount,
-                notes: json.notes,
-            },
+            data: updateData,
         });
 
         return NextResponse.json(document);

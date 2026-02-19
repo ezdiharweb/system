@@ -15,6 +15,9 @@ interface Settings {
     licenceNumber: string;
     trn: string;
     logoUrl: string;
+    stampUrl: string;
+    signatureUrl: string;
+    representativeName: string;
 }
 
 export default function SettingsPage() {
@@ -30,11 +33,16 @@ export default function SettingsPage() {
         licenceNumber: "",
         trn: "",
         logoUrl: "",
+        stampUrl: "",
+        signatureUrl: "",
+        representativeName: "",
     });
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    const [uploading, setUploading] = useState(false);
+    const [uploading, setUploading] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const stampInputRef = useRef<HTMLInputElement>(null);
+    const signatureInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         fetch("/api/settings")
@@ -67,14 +75,18 @@ export default function SettingsPage() {
         }
     }
 
-    async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    async function handleFileUpload(
+        e: React.ChangeEvent<HTMLInputElement>,
+        fieldName: "logo" | "stamp" | "signature",
+        settingsKey: "logoUrl" | "stampUrl" | "signatureUrl"
+    ) {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        setUploading(true);
+        setUploading(fieldName);
         try {
             const formData = new FormData();
-            formData.append("logo", file);
+            formData.append(fieldName, file);
 
             const res = await fetch("/api/upload", {
                 method: "POST",
@@ -84,12 +96,12 @@ export default function SettingsPage() {
             if (!res.ok) throw new Error();
 
             const data = await res.json();
-            setSettings((prev) => ({ ...prev, logoUrl: data.url }));
-            toast.success("Logo uploaded!");
+            setSettings((prev) => ({ ...prev, [settingsKey]: data.url }));
+            toast.success(`${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)} uploaded!`);
         } catch {
-            toast.error("Failed to upload logo");
+            toast.error(`Failed to upload ${fieldName}`);
         } finally {
-            setUploading(false);
+            setUploading(null);
         }
     }
 
@@ -128,21 +140,94 @@ export default function SettingsPage() {
                             <button
                                 type="button"
                                 onClick={() => fileInputRef.current?.click()}
-                                disabled={uploading}
+                                disabled={uploading === "logo"}
                                 className="bg-primary text-white px-4 py-2 rounded-lg text-sm hover:opacity-90 transition-opacity disabled:opacity-50 cursor-pointer"
                             >
-                                {uploading ? "Uploading..." : "Upload Logo"}
+                                {uploading === "logo" ? "Uploading..." : "Upload Logo"}
                             </button>
                             <input
                                 ref={fileInputRef}
                                 type="file"
                                 className="hidden"
                                 accept="image/png,image/jpeg,image/webp,image/svg+xml"
-                                onChange={handleLogoUpload}
+                                onChange={(e) => handleFileUpload(e, "logo", "logoUrl")}
                             />
                             <p className="text-xs text-gray-400 mt-2">
                                 PNG, JPG, WebP, or SVG. Recommended: 200×200px
                             </p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Stamp & Signature */}
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h2 className="text-lg font-bold text-gray-900 mb-4">
+                        Stamp & Signature
+                    </h2>
+                    <p className="text-sm text-gray-500 mb-4">
+                        These will appear on your contracts in the signature section.
+                    </p>
+                    <div className="grid grid-cols-2 gap-6">
+                        {/* Stamp */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Company Stamp</label>
+                            <div className="w-full h-28 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50 overflow-hidden mb-2">
+                                {settings.stampUrl ? (
+                                    <img
+                                        src={settings.stampUrl}
+                                        alt="Company Stamp"
+                                        className="w-full h-full object-contain p-2"
+                                    />
+                                ) : (
+                                    <span className="text-2xl text-gray-300">🔏</span>
+                                )}
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => stampInputRef.current?.click()}
+                                disabled={uploading === "stamp"}
+                                className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-200 transition-colors disabled:opacity-50 cursor-pointer w-full"
+                            >
+                                {uploading === "stamp" ? "Uploading..." : "Upload Stamp"}
+                            </button>
+                            <input
+                                ref={stampInputRef}
+                                type="file"
+                                className="hidden"
+                                accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                                onChange={(e) => handleFileUpload(e, "stamp", "stampUrl")}
+                            />
+                        </div>
+
+                        {/* Signature */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Signature</label>
+                            <div className="w-full h-28 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50 overflow-hidden mb-2">
+                                {settings.signatureUrl ? (
+                                    <img
+                                        src={settings.signatureUrl}
+                                        alt="Signature"
+                                        className="w-full h-full object-contain p-2"
+                                    />
+                                ) : (
+                                    <span className="text-2xl text-gray-300">✍️</span>
+                                )}
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => signatureInputRef.current?.click()}
+                                disabled={uploading === "signature"}
+                                className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-200 transition-colors disabled:opacity-50 cursor-pointer w-full"
+                            >
+                                {uploading === "signature" ? "Uploading..." : "Upload Signature"}
+                            </button>
+                            <input
+                                ref={signatureInputRef}
+                                type="file"
+                                className="hidden"
+                                accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                                onChange={(e) => handleFileUpload(e, "signature", "signatureUrl")}
+                            />
                         </div>
                     </div>
                 </div>
@@ -182,7 +267,7 @@ export default function SettingsPage() {
                                 placeholder="إزدهار ويب"
                             />
                         </div>
-                        <div className="col-span-2">
+                        <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Legal Name
                             </label>
@@ -194,6 +279,20 @@ export default function SettingsPage() {
                                 }
                                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                                 placeholder="Clicksalesmedia LLC"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Representative Name <span className="text-gray-400 font-normal">(for contracts)</span>
+                            </label>
+                            <input
+                                type="text"
+                                value={settings.representativeName}
+                                onChange={(e) =>
+                                    setSettings({ ...settings, representativeName: e.target.value })
+                                }
+                                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                                placeholder="Name that appears on contracts"
                             />
                         </div>
                     </div>

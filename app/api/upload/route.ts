@@ -5,11 +5,22 @@ import path from "path";
 export async function POST(request: Request) {
     try {
         const formData = await request.formData();
-        const file = formData.get("logo") as File | null;
+
+        // Accept logo, stamp, or signature
+        const file =
+            (formData.get("logo") as File | null) ||
+            (formData.get("stamp") as File | null) ||
+            (formData.get("signature") as File | null);
 
         if (!file) {
             return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
         }
+
+        // Determine prefix from field name
+        let prefix = "file";
+        if (formData.get("logo")) prefix = "logo";
+        else if (formData.get("stamp")) prefix = "stamp";
+        else if (formData.get("signature")) prefix = "signature";
 
         // Validate file type
         const allowedTypes = ["image/png", "image/jpeg", "image/webp", "image/svg+xml"];
@@ -26,7 +37,7 @@ export async function POST(request: Request) {
 
         // Generate filename
         const ext = file.name.split(".").pop() || "png";
-        const fileName = `logo-${Date.now()}.${ext}`;
+        const fileName = `${prefix}-${Date.now()}.${ext}`;
         const filePath = path.join(uploadsDir, fileName);
 
         // Write file

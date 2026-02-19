@@ -11,7 +11,7 @@ export async function POST(request: Request) {
 
     try {
         const json = await request.json();
-        const { clientId, type } = json;
+        const { clientId, type, amount, currency, notes } = json;
 
         if (!clientId || !type) {
             return new NextResponse("Missing required fields", { status: 400 });
@@ -37,8 +37,9 @@ export async function POST(request: Request) {
                 documentNumber,
                 type,
                 status: "DRAFT",
-                amount: 1190.00, // Fixed package price
-                currency: "SAR",
+                amount: amount || 1190.00,
+                currency: currency || "SAR",
+                notes: notes || null,
                 clientId,
                 createdById: session.user.id,
             },
