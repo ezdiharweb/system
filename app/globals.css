@@ -89,16 +89,15 @@ body {
   }
 
   .print-document {
-    display: flex !important;
-    flex-direction: column !important;
-    position: fixed !important;
+    display: block !important;
+    position: absolute !important;
     top: 0 !important;
     left: 0 !important;
     width: 210mm !important;
     max-width: 210mm !important;
-    min-height: 297mm !important;
     margin: 0 !important;
     padding: 0 !important;
+    padding-bottom: 80px !important;
     box-shadow: none !important;
     border-radius: 0 !important;
     border: none !important;
@@ -106,9 +105,14 @@ body {
     z-index: 999999 !important;
   }
 
-  /* Push footer to bottom of A4 page */
+  /* Footer: fixed = repeats on EVERY printed page */
   .print-document .document-footer {
-    margin-top: auto !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: 210mm !important;
+    z-index: 999999 !important;
+    background: white !important;
   }
 
   /* Force colors to print */
@@ -139,15 +143,21 @@ body {
     display: grid !important;
   }
 
-  /* Prevent page breaks inside sections */
+  /* Prevent page breaks inside contract sections */
   .print-document>div:not(.document-footer) {
     break-inside: avoid;
     page-break-inside: avoid;
   }
 
-  /* Force page break before signatures on contracts */
-  .signature-section {
-    break-before: auto;
-    page-break-before: auto;
+  /* Allow page breaks inside the contract body (individual بنود can break) */
+  .print-document .contract-body {
+    break-inside: auto !important;
+    page-break-inside: auto !important;
+  }
+
+  /* Keep each بند together */
+  .print-document .contract-body>div {
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 }

@@ -207,7 +207,7 @@ export default async function DocumentPage({
 
                 {/* ═══ CONTRACT-SPECIFIC CONTENT ═══ */}
                 {isContract && (
-                    <div style={{ padding: "16px 28px" }}>
+                    <div className="contract-body" style={{ padding: "16px 28px" }}>
                         {/* Contract Title */}
                         <h2 style={{ fontSize: "16px", fontWeight: 800, color: "#044199", textAlign: "center", marginBottom: 12 }}>
                             عقد تقديم خدمات تسويق رقمي متكاملة (باقة استراتيجية النمو)
